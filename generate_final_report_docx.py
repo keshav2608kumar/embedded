@@ -144,7 +144,7 @@ def build_report():
         ("Field", "Details"),
         ("Scope tier", "Embedded controller and supervised bench prototype; PC-side four-slot image classification & live CCTV sync"),
         ("Submission date", "28 October 2026"),
-        ("Repository link", "https://github.com/keshav2608kumar/embedded  (Verified Commit: f2d4501)"),
+        ("Repository link", "https://github.com/keshav2608kumar/embedded  (Verified Commit: 76ad359)"),
         ("Demo video link", "https://drive.google.com/file/d/1MQ7Ptyjlz7dNh2EzUmWyQ3nM4Q1Sdfvu/view?usp=drive_link"),
     ]
     for i, (k, v) in enumerate(meta_data):
@@ -605,7 +605,7 @@ def build_report():
         for j, val in enumerate(row):
             contrib_table.rows[i].cells[j].paragraphs[0].add_run(val)
     format_table(contrib_table, contrib_widths, header_bg="0F2A4A", stripe_bg="F1F5F9")
-    p_text("Repository Commitment: All source code, test suites, and models are version-controlled in the project Git repository (https://github.com/keshav2608kumar/embedded) under commit hash f2d4501.", space_after=10)
+    p_text("Repository Commitment: All source code, test suites, and models are version-controlled in the project Git repository (https://github.com/keshav2608kumar/embedded) under commit hash 76ad359.", space_after=10)
 
     add_h1("11 Limitations and future work")
     p_text("While ParkSense successfully demonstrates closed-loop admission automation and live telemetry on physical hardware (COM9), several production-grade enhancements remain for industrial translation:", space_after=6)
