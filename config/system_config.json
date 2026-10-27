@@ -1,0 +1,82 @@
+{
+  "_description": "Smart Parking Management System - System Configuration",
+  "_version": "1.0.0",
+
+  "camera": {
+    "source": "parking_crop_loop.mp4",
+    "_source_help": "int = webcam index | string = video file path | string = rtsp://... for IP cam",
+    "frame_width": 1280,
+    "frame_height": 720,
+    "target_fps": 30
+  },
+
+  "model": {
+    "path": "ai/models/best.pt",
+    "_path_help": "Path to trained YOLO model. Falls back to yolov8n.pt if not found.",
+    "fallback_model": "yolov8n.pt",
+    "confidence_threshold": 0.40,
+    "_conf_help": "Detections below this confidence are treated as UNCERTAIN",
+    "iou_threshold": 0.45,
+    "imgsz": 640,
+    "device": "auto",
+    "_device_help": "auto = CUDA if available else CPU | 0 = GPU 0 | cpu = CPU"
+  },
+
+  "temporal_filter": {
+    "occupied_confirm_frames": 5,
+    "_occupied_help": "Number of consecutive OCCUPIED candidate frames before confirming OCCUPIED state",
+    "free_confirm_frames": 8,
+    "_free_help": "Number of consecutive FREE candidate frames before confirming FREE state",
+    "uncertain_timeout_frames": 15,
+    "_uncertain_help": "Frames without any detection before state becomes UNCERTAIN"
+  },
+
+  "slot_mapping": {
+    "overlap_threshold": 0.15,
+    "_overlap_help": "Minimum IoU overlap between bounding box and slot polygon to assign vehicle",
+    "use_center_point": false,
+    "_center_help": "If true, use bbox center point for polygon matching (simpler). If false, use overlap."
+  },
+
+  "communication": {
+    "enabled": true,
+    "type": "serial",
+    "_type_help": "serial | wifi (wifi is future scope)",
+    "serial": {
+      "port": "COM9",
+      "_port_help": "Update to your actual ESP32 COM port before running",
+      "baud_rate": 115200,
+      "timeout_sec": 2.0,
+      "send_interval_sec": 1.0,
+      "_send_help": "How often to send status packets to ESP32",
+      "comm_lost_timeout_sec": 10.0,
+      "_lost_help": "Declare COMMUNICATION_LOST if no ACK received in this many seconds"
+    }
+  },
+
+  "logging": {
+    "enabled": true,
+    "log_dir": "logs",
+    "log_format": "csv",
+    "_format_help": "csv | json",
+    "log_level": "INFO"
+  },
+
+  "display": {
+    "show_overlay": true,
+    "show_bounding_boxes": true,
+    "show_slot_polygons": true,
+    "overlay_font_scale": 0.6,
+    "window_name": "Smart Parking - AI Pipeline"
+  },
+
+  "simulation": {
+    "initial_slots": {
+      "S1": false,
+      "S2": false,
+      "S3": false,
+      "S4": false
+    },
+    "_slot_help": "true = OCCUPIED, false = FREE"
+  }
+}

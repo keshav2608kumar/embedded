@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Parking - Exact Diagrams (CDFG & FSM) | BACSE324</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --accent: #38bdf8;
+      --green: #22c55e;
+      --red: #ef4444;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background-color: #0b0f19;
+      color: var(--text);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      text-align: center;
+      max-width: 900px;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .badge-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--card-bg);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+    }
+    .diagram-panel {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      border: 2px solid var(--border);
+      position: relative;
+    }
+    .diagram-panel.active {
+      display: block;
+    }
+    .diagram-img-wrap {
+      width: 100%;
+      text-align: center;
+      background: #f8fafc;
+      padding: 16px;
+      overflow-x: auto;
+    }
+    .diagram-img-wrap img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto;
+    }
+    .action-bar {
+      background: var(--card-bg);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn:hover {
+      background: #1d4ed8;
+    }
+    .btn-secondary {
+      background: #334155;
+    }
+    .btn-secondary:hover {
+      background: #475569;
+    }
+    .instructions {
+      max-width: 1100px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 24px;
+    }
+    .instructions h2 {
+      font-size: 16px;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .instructions ol {
+      padding-left: 20px;
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .instructions code {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #38bdf8;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Smart Parking Management System — Exact Design Diagrams</h1>
+    <p>High-resolution, measured-benchmark diagrams for BACSE324 Review 2 presentation & report.</p>
+    <div class="badge-bar">
+      <span class="badge">CDFG Path: 13.43 ms (Slack: 86.57 ms)</span>
+      <span class="badge">YOLOv8 Inference: 12.93 ms (RTX 3050)</span>
+      <span class="badge">Safety Reversal: &lt; 25 ms</span>
+      <span class="badge">Moore 6-State FSM</span>
+      <span class="badge">RMS Utilization: 2.6% &lt;&lt; 75.7%</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('cdfg')">📊 1. CDFG Diagram (CCTV Pipeline)</button>
+    <button class="tab-btn" onclick="switchTab('fsm')">🔄 2. Moore FSM Diagram (Gate Control)</button>
+  </div>
+
+  <!-- CDFG Panel -->
+  <div id="panel-cdfg" class="diagram-panel active">
+    <div class="diagram-img-wrap">
+      <img src="cdfg_diagram.png" alt="Control Data Flow Graph (CDFG) Diagram">
+    </div>
+    <div class="action-bar">
+      <div>
+        <strong style="color:white; font-size:14px;">Control Data Flow Graph (CDFG)</strong>
+        <p style="color:#94a3b8; font-size:12px;">Total critical path: 13.43 ms against 100 ms deadline (86.6% safety margin)</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <a href="cdfg_diagram.png" download="cdfg_diagram.png" class="btn">📥 Download High-Res PNG</a>
+        <a href="cdfg_diagram.drawio" download="cdfg_diagram.drawio" class="btn btn-secondary">📐 Download .drawio File</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FSM Panel -->
+  <div id="panel-fsm" class="diagram-panel">
+    <div class="diagram-img-wrap">
+      <img src="fsm_diagram.png" alt="Moore Gate Finite State Machine (FSM) Diagram">
+    </div>
+    <div class="action-bar">
+      <div>
+        <strong style="color:white; font-size:14px;">Moore Gate Finite State Machine (FSM)</strong>
+        <p style="color:#94a3b8; font-size:12px;">6 states, FAULT_SAFE recovery, anti-pinch reversal in &lt;25 ms, 10s auto-close timer</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <a href="fsm_diagram.png" download="fsm_diagram.png" class="btn">📥 Download High-Res PNG</a>
+        <a href="fsm_diagram.drawio" download="fsm_diagram.drawio" class="btn btn-secondary">📐 Download .drawio File</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions for Draw.io -->
+  <div class="instructions">
+    <h2>🎯 How to Open and Edit in Draw.io (app.diagrams.net):</h2>
+    <ol>
+      <li>Go to your web browser and open: <strong><a href="https://app.diagrams.net" target="_blank" style="color:#38bdf8; text-decoration:none;">https://app.diagrams.net</a></strong></li>
+      <li>Click <strong>"Open Existing Diagram"</strong> (or simply drag and drop the file into the draw.io window).</li>
+      <li>Select <code>c:\Users\kesha\Desktop\embedded\smart-parking-system\cdfg_diagram.drawio</code> or <code>fsm_diagram.drawio</code>.</li>
+      <li>The complete diagram with all rounded shapes, exact labels, measured timings, and color-coded paths will open instantly!</li>
+      <li>You can edit text, move nodes, or click <strong>File &rarr; Export as &rarr; PNG / PDF / SVG</strong> anytime.</li>
+    </ol>
+  </div>
+
+  <script>
+    function switchTab(type) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.diagram-panel').forEach(panel => panel.classList.remove('active'));
+      if (type === 'cdfg') {
+        document.querySelector('.tabs button:nth-child(1)').classList.add('active');
+        document.getElementById('panel-cdfg').classList.add('active');
+      } else {
+        document.querySelector('.tabs button:nth-child(2)').classList.add('active');
+        document.getElementById('panel-fsm').classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+# Smart Parking System - YOLO Training Configuration
+# STATUS: IMPLEMENTED (script ready; actual training = TO BE TESTED with dataset)
+#
+# Usage:
+#   python ai/training/train.py
+#   python ai/training/train.py --config ai/training/config.yaml
+#   python ai/training/train.py --stage finetune  # project-specific CCTV fine-tune
+
+# ── Model ─────────────────────────────────────────────────────────────────────
+model: yolov8n.pt        # Pretrained YOLOv8 nano — lightweight, runs well on RTX 3050
+                         # Options: yolov8n.pt | yolov8s.pt | yolov8m.pt
+
+# Resume from a previous checkpoint (e.g., for fine-tuning stage 2)
+resume_from: null        # null | path to .pt file
+
+# ── Dataset ───────────────────────────────────────────────────────────────────
+dataset: ai/dataset/dataset.yaml   # relative to project root
+
+# ── Training Hyperparameters ──────────────────────────────────────────────────
+epochs: 50               # Initial training epochs
+imgsz: 640               # Image size (pixels, square)
+batch: 16                # Batch size — reduce to 8 if GPU OOM on RTX 3050
+lr0: 0.01                # Initial learning rate
+lrf: 0.01                # Final learning rate factor (lr0 * lrf at end)
+momentum: 0.937
+weight_decay: 0.0005
+warmup_epochs: 3.0
+patience: 15             # Early stopping patience (0 = disabled)
+
+# ── Inference Thresholds ──────────────────────────────────────────────────────
+conf: 0.40               # Confidence threshold for training validation
+iou: 0.45                # IoU threshold for NMS
+
+# ── Output ────────────────────────────────────────────────────────────────────
+output_dir: outputs/training
+project_name: smart_parking_yolo
+run_name: baseline       # run_name for stage 1; "finetune" for stage 2
+
+# ── Hardware ──────────────────────────────────────────────────────────────────
+device: auto             # auto = CUDA if available, else CPU
+workers: 4               # DataLoader workers
+
+# ── Augmentation ─────────────────────────────────────────────────────────────
+# YOLOv8 default augmentation is generally good for parking detection.
+# Explicit overrides:
+augment: true
+hsv_h: 0.015             # Hue jitter
+hsv_s: 0.7               # Saturation jitter
+hsv_v: 0.4               # Brightness jitter — important for lighting variation
+degrees: 10.0            # Rotation — helps with camera angle variations
+translate: 0.1
+scale: 0.5
+fliplr: 0.5              # Horizontal flip
+mosaic: 1.0              # Mosaic augmentation

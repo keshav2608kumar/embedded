@@ -1,0 +1,17 @@
+# Smart Parking Management System - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core AI / Computer Vision
+opencv-python>=4.8.0
+numpy>=1.24.0
+ultralytics>=8.0.0      # YOLOv8 - includes torch dependency
+
+# Serial Communication (PC → ESP32)
+pyserial>=3.5
+
+# Configuration & Utilities
+PyYAML>=6.0
+
+# NOTE: PyTorch with CUDA is assumed pre-installed.
+# If not, install manually:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126

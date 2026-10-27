@@ -1,0 +1,187 @@
+IMAGES: 4
+
+=== PARAGRAPHS ===
+P0: BACSE324 · Embedded Systems Architecture · Fall 2026 · Review 2
+P1: Design Models: CDFG, FSM and Task Schedule
+P2: Review 2 submission · due end of September · 6–10 pages excluding cover and appendices
+P4: Team
+P7: Diagrams must be your own — draw.io, yEd, Visio or a clean hand drawing scanned at legible resolution. A screenshot of a tool-generated or AI-generated diagram you cannot explain scores band 1. Every number needs a unit and a source: measured, datasheet or estimated.
+P9: 1  System recap
+P10: The Smart Parking Management System uses one CCTV/USB/IP camera to observe four fixed parking bays (S1–S4). A PC runs OpenCV and a YOLO vehicle detector, maps detections to calibrated slot polygons, and applies temporal filtering before publishing confirmed occupancy to an ESP32. The ESP32 displays availability on a 16×2 I²C LCD, operates a buzzer, and controls a servo-operated entrance gate using a finite-state machine (FSM). A separate vehicle-present sensor provides gate-passage safety; the watchdog timer (WDT) is intended to recover from an unresponsive firmware task. The system is designed for a small controlled parking demonstration. AI training, camera calibration and hardware timing values must be measured on the actual setup before performance claims are made.
+P11: Figure 1 — System block diagram: MCU, sensors, actuators, communication links, power.
+P12: 1.1  Conditions carried from proposal review
+P13: Proposal-review conditions and Review 2 additions must be checked against the instructor’s actual review sheet. The rows below reflect the requirements visible in the project plan; replace or add rows if the review sheet specifies different wording.
+P15: 2  Control Data Flow Graph
+P16: The critical path selected is the PC-side occupancy update cycle from frame acquisition through YOLO inference, slot mapping, temporal filtering and free-slot calculation. It is critical because the gate decision depends on a fresh, stable occupancy estimate. Timing values below are initial engineering estimates for planning only, not measured results; the actual model, image size and computer hardware will change them.
+P17: 2.1  Choosing the critical function
+P18: List at least three candidate functions or ISRs. Say why the chosen one is critical: it has the tightest deadline, the longest execution, the most data dependencies, or it blocks other work.
+P20: Candidate comparison indicates YOLO inference is expected to dominate the PC-side processing latency. The occupancy update is therefore selected as the critical processing function. The estimates in this report are provisional assumptions for the design model and must be replaced by measurements (timestamps or profiler output) during implementation. The safety-critical gate FSM remains on the ESP32 and must not wait synchronously for a new AI inference to finish.
+P21: 2.2  The CDFG
+P22: CDFG convention: rounded operation blocks represent processing nodes; dashed arrows represent control/validity checks. The selected path is capture → YOLO inference → slot mapping → temporal filter → free-slot count. YOLO inference is the dominant estimated operation. The diagram is a planning model; use measured timing in the final report.
+P23: Figure 2 — CDFG of CCTV occupancy update cycle.
+P24: 2.3  Node table
+P26: 2.4  Critical path
+P27: The longest normal path is N1 → N2 → N3 → N4 → N5. Using provisional estimates: 8 ms + 35 ms + 2 ms + 1 ms + 1 ms = 47 ms. Against an illustrative 100 ms occupancy-update deadline, estimated slack is 53 ms. These figures are estimates only; they are not measured. The independent ESP32 control tick and sensor sampling should continue while the PC performs inference.
+P29: The design uses a Moore-style gate FSM for stable state-dependent outputs, with safety inputs evaluated as transition guards. A fault/safe state is included. The AI occupancy state is treated as input data to the gate controller, not as part of the gate FSM’s internal states.
+P30: 3  System-behaviour FSM
+P31: Model type: Moore-style FSM for gate outputs. Gate outputs (servo target, LCD gate status and buzzer pattern) are defined primarily by the current state. Input events and guards determine transitions. A safety override reopens the gate if the vehicle sensor detects a vehicle during closing.
+P32: 3.1  Model type
+P34: The system FSM covers CLOSED, OPENING, OPEN, VEHICLE_PASSING, CLOSING and FAULT_SAFE. Entry is permitted only when the latest valid occupancy packet reports at least one free slot and a vehicle request is present. If occupancy data becomes stale or communication fails, the controller must not rely indefinitely on stale availability; the implementation should inhibit new entry and raise an alert. The physical safe position must be confirmed with the actual gate mechanism and instructor.
+P35: 3.2  State diagram
+P36: Safe state: FAULT_SAFE. Stop issuing new opening/closing commands except a safety-controlled reopen if the vehicle sensor indicates an obstruction; command the mechanism to the configured safe target, inhibit new entry, show FAULT on the LCD and use a bounded buzzer alert. A watchdog reset must initialize outputs conservatively before accepting new commands. The exact mechanical safe action (hold-open versus closed) must be verified against the physical gate and obstruction risks; never force closing onto a vehicle.
+P37: 3.3  State transition table
+P38: Completeness rule: for unlisted events, the event is ignored and the current state is retained. Fault and obstruction events have priority over ordinary transitions. On the final firmware, enumerate all events explicitly and test every transition.
+P39: 3.4  Fault, recovery and safe state
+P40: Task timing is an initial schedulability model. PC AI tasks and ESP32 real-time control tasks run on separate processors; the table is a combined engineering inventory, not a claim that one scheduler controls both. WCET values are estimates unless explicitly marked otherwise. Replace estimates with measured worst-case values before final submission.
+P41: Safe state and outputs: 
+P42: Task-level approach: fixed-priority periodic/event-driven scheduling on the ESP32, with a short non-blocking control tick for sensor sampling and FSM updates. The PC inference pipeline is asynchronous and communicates only the latest confirmed occupancy snapshot. This is preferred over blocking the ESP32 while waiting for YOLO. At operation level, use ASAP dependency ordering for the CDFG; independent sensor/control work can proceed concurrently with PC inference.
+P44: Illustrative PC path estimate: 47 ms per occupancy update. If the target update period is 100 ms, estimated utilisation of that single serial path is 47/100 = 0.47 (47%). This is only a planning estimate, not proof of actual schedulability. ESP32 tasks have separate execution budgets and must be measured on hardware. The RMS utilisation bound is not applied to the PC inference chain because it is modeled as a sequential pipeline, not a set of periodic tasks on the ESP32.
+P45: 4  Task schedule
+P46: Timeline shown is an illustrative dependency/timing estimate for one AI occupancy update. It is not a measured trace. After implementation, capture timestamps for each stage and replace the bars with measured values. ESP32 sensor/FSM work is independent and should remain responsive during AI inference.
+P48: Use a short critical section or atomic snapshot when sharing the latest occupancy packet between communication parsing and the FSM. Serial RX should populate a validated temporary packet, then publish a complete snapshot; never update S1–S4 fields partially. Sensor state should be debounced and read in the control tick. Avoid long blocking delays in the FSM. Bound the time spent in LCD and serial operations so they cannot stall gate safety checks.
+P49: Total utilisation U = 
+P50: This table maps the design model to intended source files. The exact function names may be adjusted during implementation, but the model element, owner and corresponding code must remain traceable. Final report should replace planned paths with the actual repository paths and function names.
+P52: Target dates are a proposed work plan for the next implementation period. Adjust to the instructor’s required submission dates. The most significant risks are dataset mismatch, unavailable hardware and unsafe gate mechanics; each has a software fallback for development but still requires real-world validation.
+P53: Why this approach and not the obvious alternative: 
+P54: Contributions are assigned by subsystem. All three are essential to the integrated prototype. Percentages are planning shares intended to be approximately equal, not a claim of measured effort; update them if the team agrees otherwise.
+P56: 4.4  Timeline
+P57: Figure 4 — Schedule over one hyperperiod (task level) or across all control steps (operation level).
+P58: 4.5  Shared resources and interrupts
+P61: 5  Planned traceability
+P64: 6  Plan to Final
+P66: 7  Individual contribution
+P69: References
+P70: IEEE style. Cite datasheets for every timing figure you did not measure.
+P71: References (IEEE style; verify exact version/datasheet before final submission):
+[1] Ultralytics, “Parking Management using Ultralytics YOLO,” Ultralytics Documentation. Available: https://docs.ultralytics.com/guides/parking-management/ (accessed 10 Oct. 2026).
+[2] Espressif Systems, “ESP-IDF Programming Guide: Watchdogs,” official documentation. Use the guide matching the installed ESP-IDF/Arduino-ESP32 version.
+[3] ESP32 technical reference/datasheet for the exact board/module used; add exact manufacturer document and version before submission.
+Timing figures in this draft are estimates for planning and must be replaced with measured values or supported datasheet figures.
+P72: Submission checklist
+
+=== TABLES ===
+
+--- TABLE 0 (4 rows x 2 cols) ---
+Project title | Smart Parking Management System Using CCTV + AI
+Scope tier (from review sheet) | As assigned in proposal review — confirm exact tier
+Submission date | 10 October 2026
+Repository link (optional) | 
+
+--- TABLE 1 (5 rows x 4 cols) ---
+Member | Reg. no. | Module owned | Sections written
+Harshavardhan Singh | 25BCE0552 | Hardware and circuit integration (30%): ESP32 wiring, LCD, LEDs, buzzer, servo, vehicle-present sensor, power and hardware validation. | Hardware architecture, wiring, LCD/buzzer/servo/sensor
+Shaikh Shayaan | 25BCE2623 | Gate and entry/exit engineering (25%): Gate FSM, vehicle-present logic, safe opening/closing, refusal when full, gate tests and demo. | FSM, vehicle-present safety, gate sequence and tests
+Keshav Kumar | 25BCE2880 | AI vehicle detection & vision pipeline (25%): Camera/OpenCV pipeline, YOLO inference, S1–S4 region mapping, serial transmission protocol. | Dataset/model pipeline, OpenCV/YOLO, slot mapping, serial protocol
+Joshua Joel J | 25BCE2746 | Integration and management logic (20%): Occupancy filtering validation, session/duration tracking, fault-case test plan, communication integration and measured-results logging. | Integration, filtering tests and session tracking
+
+--- TABLE 2 (1 rows x 1 cols) ---
+
+
+--- TABLE 3 (7 rows x 3 cols) ---
+Condition / mandatory addition (from your review sheet) | Status | Where it is addressed
+Four fixed slots S1–S4; CCTV + AI occupancy | Addressed in design | Sections 1, 2 and AI pipeline
+Temporal filtering/debouncing | Planned; test required | Sections 2 and 5
+Vehicle-present sensor + gate FSM safety | Planned; hardware test required | Section 3
+Occupancy duration/session count | Planned | Traceability and Final implementation
+Fault handling, AI confidence and invalid detections | Planned | AI pipeline and error handling
+Confirm CCTV architecture with instructor if required | Confirm with guide | Before final hardware integration
+
+--- TABLE 4 (4 rows x 6 cols) ---
+Function / ISR | Trigger | Rate | Est. execution time | Deadline | Chosen? Why / why not
+CCTV occupancy update (chosen) | New frame available | 100 ms target | 47 ms (estimated) | 100 ms target | Chosen: gate depends on fresh stable occupancy
+ESP32 sensor + FSM tick | Periodic timer | 10 ms target | 1 ms (estimated) | 10 ms target | Separate safety control from AI inference
+Serial packet parser | Packet received | Event-driven | 1 ms (estimated) | 10 ms target | Validate complete packet; reject malformed data
+
+--- TABLE 5 (1 rows x 1 cols) ---
+
+
+--- TABLE 6 (7 rows x 6 cols) ---
+Node | Operation | Inputs | Output | Est. cost (cycles / µs) | Source line or function
+N1 | Capture frame | Camera | Frame | 8 ms (est.) | capture_frame()
+N2 | YOLO inference | Frame, model | Boxes + confidence | 35 ms (est.) | run_inference()
+N3 | Slot polygon mapping | Boxes, slot JSON | Slot candidates | 2 ms (est.) | map_detections_to_slots()
+N4 | Temporal filtering | Candidates, prior state | Confirmed S1–S4 | 1 ms (est.) | update_occupancy_filter()
+N5 | Count free slots | Confirmed S1–S4 | FREE count | <1 ms (est.) | count_free_slots()
+D1 | Frame/model validity check | Frame/model status | valid / degraded | <1 ms (est.) | validate_input()
+
+--- TABLE 7 (2 rows x 4 cols) ---
+Critical path (node sequence) | Total latency | Deadline | Slack
+N1 → N2 → N3 → N4 → N5 | 47 ms (estimated) | 100 ms target | 53 ms estimated
+
+--- TABLE 8 (1 rows x 1 cols) ---
+
+
+--- TABLE 9 (9 rows x 5 cols) ---
+Current state | Event | Guard | Next state | Output / action
+CLOSED | Vehicle request | Valid packet AND free_slots > 0 | OPENING | Command servo toward open target
+OPENING | Open position reached | No critical fault | OPEN | Hold open target
+OPEN | Vehicle sensor active | Entry was permitted | VEHICLE_PASSING | Keep gate open
+VEHICLE_PASSING | Sensor clear for debounce interval | Passage timeout not exceeded | CLOSING | Begin controlled close
+CLOSING | Closed position reached | Sensor clear | CLOSED | Stop/hold at closed target
+CLOSING | Vehicle sensor active | Always; safety priority | OPENING | Reopen; log obstruction
+Any normal state | Critical sensor/communication fault | Fault policy triggered | FAULT_SAFE | Inhibit new entry; alert; conservative output
+FAULT_SAFE | Fault cleared + explicit recovery | Inputs valid; safe to resume | CLOSED | Reinitialize; require fresh occupancy packet
+
+--- TABLE 10 (7 rows x 5 cols) ---
+State ↓ / Event → |  |  |  | 
+State ↓ / Event → | Request + free | Open reached | Sensor active | Sensor clear/closed
+CLOSED | OPENING | — | — | —
+OPENING | — | OPEN | — | —
+OPEN | — | — | VEHICLE_PASSING | —
+VEHICLE_PASSING | — | — | VEHICLE_PASSING | CLOSING
+CLOSING | — | — | OPENING | CLOSED
+
+--- TABLE 11 (7 rows x 8 cols) ---
+Task | Trigger | Period T | WCET C | Deadline D | Priority | U = C / T | WCET source
+PC occupancy pipeline | New frame | 100 ms target | 47 ms est. | 100 ms target | PC process | 0.47 est. | CDFG estimates; measure
+ESP32 sensor/FSM tick | Timer | 10 ms target | 1 ms est. | 10 ms target | High | 0.10 est. | Estimate; measure with GPIO/scope
+Serial RX parser | Packet event | Event-driven | 1 ms est. | 10 ms target | Medium | N/A | Estimate; measure
+LCD refresh | Timer/state change | 250 ms target | 5 ms est. | 250 ms target | Low | 0.02 est. | Estimate; measure
+Buzzer update | State/event | 10 ms tick | <1 ms est. | 10 ms target | High | <0.10 est. | Estimate; measure
+WDT supervision | Periodic health check | 100 ms target | <1 ms est. | 100 ms target | High | <0.01 est. | Verify against ESP32 API
+
+--- TABLE 12 (1 rows x 1 cols) ---
+
+
+--- TABLE 13 (6 rows x 4 cols) ---
+Shared resource | Used by | Protection | Worst-case blocking
+Latest occupancy snapshot | Serial parser + FSM | Validate then atomic/critical-section publish | Short bounded copy
+Vehicle sensor state | GPIO ISR/control tick | Debounce + volatile/atomic flag | One control tick
+Servo peripheral | FSM + timer/PWM | Single owner: FSM module | No blocking servo wait
+LCD I²C bus | Display task | Single owner; bounded update | Bounded I²C transaction
+Serial port | PC + ESP32 parser | Framed packet + terminator validation | One packet parse
+
+--- TABLE 14 (8 rows x 4 cols) ---
+Model element (CDFG node, FSM state, task) | Planned file | Planned function | Owner
+N1–N5 CDFG | ai/inference/run_cctv.py | capture_frame() … count_free_slots() | Keshav Kumar
+Slot mapping/filter | ai/slot_mapping/ | map_detections_to_slots(); update_filter() | Keshav Kumar
+Communication packet | communication/serial/ | send_status(); parse_packet() | Keshav + Harshavardhan
+FSM states/transitions | esp32/gate_fsm/ | updateGateFSM() | Shaikh Shayaan
+Vehicle sensor | esp32/vehicle_sensor/ | readVehicleSensor() | Shaikh + Harshavardhan
+LCD/buzzer/servo | esp32/main/ | updateLCD(); setBuzzer(); setGateServo() | Harshavardhan
+WDT/fault recovery | esp32/watchdog/ | initWatchdog(); healthCheck() | Harshavardhan + Shaikh
+
+--- TABLE 15 (6 rows x 4 cols) ---
+Remaining work | Owner | Target date | Risk and fallback
+Capture/annotate CCTV frames; calibrate S1–S4 | Keshav Kumar | 12 Oct 2026 | Camera/data unavailable → sample video for software tests; real-view validation still required
+Train/fine-tune YOLO and record metrics | Keshav Kumar | 14 Oct 2026 | GPU/model issue → CPU baseline; report actual metrics only
+Implement ESP32 peripherals and serial protocol | Harshavardhan Singh | 13 Oct 2026 | Hardware unavailable → mock serial and component test sketches
+Implement gate FSM, safety override and WDT | Shaikh Shayaan | 14 Oct 2026 | Sensor/servo unavailable → unit-test transitions in simulation
+Integrate, run test matrix and update docs | All three members | 16 Oct 2026 | Delay → demonstrate simulation separately; mark hardware tests pending
+
+--- TABLE 16 (5 rows x 4 cols) ---
+Member | Model / section produced | Module for Final | Share %
+Harshavardhan Singh | Hardware block diagram, peripheral interfaces, wiring/test plan | Hardware / circuit | 30%
+Shaikh Shayaan | System FSM, transition table, safe state and gate safety tests | Gate / entry-exit | 25%
+Keshav Kumar | AI occupancy CDFG, dataset/model pipeline, slot mapping/communication | AI / embedded logic | 25%
+Joshua Joel J (25BCE2746) | Integration test matrix, temporal filtering validation, duration/session model and fault test evidence | Filtering and fault validation, session tracking, communication integration | 20%
+
+--- TABLE 17 (8 rows x 2 cols) ---
+Item | ✓
+Guidance blocks deleted; 6–10 pages excluding cover and appendices | ✓
+Critical function justified against at least three candidates | ✓
+CDFG with node costs and the critical path stated | ✓
+FSM with model type, transition table, fault and safe state | ✓
+Task set with WCET source, chosen approach and schedule-ability proof | ✓
+Every carried condition listed with its status | ✓
+Every member named against a model they can explain | ✓

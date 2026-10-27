@@ -1,0 +1,134 @@
+<mxfile host="app.diagrams.net" modified="2026-10-27T12:00:00.000Z" agent="Antigravity" version="21.0.0" type="device">
+  <diagram id="cdfg_diagram" name="CDFG - Smart Parking">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="950" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Header Title -->
+        <mxCell id="title" value="Control Data Flow Graph (CDFG): CCTV Occupancy Update Cycle&#xa;Total Path: 13.43 ms (Measured on RTX 3050 GPU) | Deadline: 100 ms | Slack: 86.57 ms" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="150" y="20" width="650" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Start Node -->
+        <mxCell id="start" value="Start / Periodic Update" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#0f172a;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=30;" vertex="1" parent="1">
+          <mxGeometry x="360" y="80" width="220" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- N1 Capture -->
+        <mxCell id="n1" value="N1: Capture Camera Frame&#xa;0.47 ms (measured) / 8 ms (est.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e3a8a;strokeColor=#172554;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="360" y="160" width="220" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- D1 Valid? (Decision) -->
+        <mxCell id="d1" value="D1: Frame and Model Valid?&#xa;&lt; 0.01 ms" style="rhombus;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=#334155;fontColor=#ffffff;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="360" y="250" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Reject Branch -->
+        <mxCell id="reject" value="Reject Frame / Retain Last Valid State&#xa;(Degraded: Flag &amp; Hold Occupancy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#475569;fontColor=#94a3b8;fontStyle=1;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="660" y="380" width="230" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- N2 YOLO Inference -->
+        <mxCell id="n2" value="N2: Run YOLO Inference&#xa;12.93 ms (measured on RTX 3050)&#xa;[Dominates path: 96.3% of compute]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1d4ed8;strokeColor=#1e40af;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="360" y="360" width="220" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- N3 Slot Mapping -->
+        <mxCell id="n3" value="N3: Map Detections to Slots S1–S4&#xa;0.006 ms (measured) / 2 ms (est.)&#xa;[cv2.pointPolygonTest geometry]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563eb;strokeColor=#1d4ed8;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="360" y="465" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- N4 Filter -->
+        <mxCell id="n4" value="N4: Update Temporal Filter&#xa;0.004 ms (measured) / 1 ms (est.)&#xa;[5-frame occ / 8-frame free debounce]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3b82f6;strokeColor=#2563eb;fontColor=#ffffff;fontStyle=1;fontSize=12;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="360" y="565" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- N5 Count Free Slots -->
+        <mxCell id="n5" value="N5: Count Free Slots&#xa;0.006 ms (measured) / &lt;1 ms (est.)&#xa;[Calculate best bay recommendation]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a5fa;strokeColor=#3b82f6;fontColor=#0f172a;fontStyle=1;fontSize=12;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="360" y="665" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Publish Snapshot -->
+        <mxCell id="pub" value="Publish Occupancy Snapshot&#xa;&lt;PKT,S1=val,S2=val,S3=val,S4=val,FREE=cnt,REC=bay&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0284c7;strokeColor=#0369a1;fontColor=#ffffff;fontStyle=1;fontSize=11;arcSize=15;" vertex="1" parent="1">
+          <mxGeometry x="330" y="765" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- End Node -->
+        <mxCell id="end" value="End / Wait for Next Update" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#0f172a;fontColor=#ffffff;fontStyle=1;fontSize=13;arcSize=30;" vertex="1" parent="1">
+          <mxGeometry x="360" y="855" width="220" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- CONNECTORS / EDGES -->
+        <mxCell id="e1" edge="1" parent="1" source="start" target="n1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e2" edge="1" parent="1" source="n1" target="d1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- D1 -> N2 (Yes) -->
+        <mxCell id="e3" edge="1" parent="1" source="d1" target="n2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#059669;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3_label" value="Yes" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#059669;" vertex="1" connectable="0" parent="e3">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint x="15" y="-5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- D1 -> Reject (No) -->
+        <mxCell id="e4" edge="1" parent="1" source="d1" target="reject" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#dc2626;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4_label" value="No" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#dc2626;" vertex="1" connectable="0" parent="e4">
+          <mxGeometry x="-0.4" relative="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Reject -> End -->
+        <mxCell id="e5" edge="1" parent="1" source="reject" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#64748b;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="775" y="877" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- N2 -> N3 -->
+        <mxCell id="e6" edge="1" parent="1" source="n2" target="n3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- N3 -> N4 -->
+        <mxCell id="e7" edge="1" parent="1" source="n3" target="n4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- N4 -> N5 -->
+        <mxCell id="e8" edge="1" parent="1" source="n4" target="n5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- N5 -> Publish -->
+        <mxCell id="e9" edge="1" parent="1" source="n5" target="pub" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Publish -> End -->
+        <mxCell id="e10" edge="1" parent="1" source="pub" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#334155;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Summary Annotation Box -->
+        <mxCell id="summary" value="Critical Path Summary:&#xa;• Longest Path: N1 → D1 → N2 → N3 → N4 → N5&#xa;• Total Latency: 13.43 ms&#xa;• Deadline: 100 ms (10 FPS camera rate)&#xa;• Slack Margin: 86.57 ms (86.6 % margin)&#xa;• YOLO Inference: 96.3 % of compute path" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=top;align=left;spacingLeft=8;spacingTop=6;fillColor=#f8fafc;strokeColor=#64748b;fontColor=#0f172a;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="240" height="130" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

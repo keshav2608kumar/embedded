@@ -1,0 +1,19 @@
+# Large archives and heavy models exceeding GitHub 100MB limit
+archive.zip
+*.zip
+yolov8x.pt
+
+# Datasets and cache
+ai/dataset/pklot/
+ai/dataset/archive/
+*.cache
+
+# Build artifacts & temp
+.pio/
+esp32/.pio/
+runs/
+logs/
+outputs/
+temp_vid/
+__pycache__/
+*.pyc

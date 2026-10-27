@@ -1,0 +1,28 @@
+# Smart Parking System - YOLO Dataset Configuration
+# STATUS: IMPLEMENTED (paths configured; actual images = TO BE ADDED)
+#
+# The AI model detects ONE class: "vehicle"
+# Parking-slot identification (S1-S4) is handled by the slot-mapping layer,
+# NOT by the YOLO model. This keeps the model layout-independent.
+#
+# Public dataset recommended: PKLot
+#   https://web.inf.ufpr.br/vri/databases/parking-lot-database/
+#   After download, reformat to YOLO format using data_tools/convert_pklot.py
+#
+# Project-specific data: capture using data_tools/capture_dataset.py
+
+# Dataset root — path is relative to THIS yaml file location
+path: ../ai/dataset
+
+train: images/train
+val:   images/val
+test:  images/test
+
+# Number of classes
+nc: 1
+
+# Class names
+# IMPORTANT: Only "vehicle" is detected by YOLO.
+# S1/S2/S3/S4 assignment is done in slot_mapper.py (geometry layer).
+names:
+  0: vehicle

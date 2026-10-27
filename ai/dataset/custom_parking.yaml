@@ -1,0 +1,6 @@
+path: C:\Users\kesha\Desktop\embedded\smart-parking-system\ai\dataset\custom_parking
+train: images/train
+val: images/val
+
+names:
+  0: vehicle
